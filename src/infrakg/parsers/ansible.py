@@ -39,7 +39,6 @@ class AnsibleParser(ParserPlugin):
                 # Ansible playbooks are usually a list of plays
                 continue
 
-            is_playbook = False
             for idx, play in enumerate(doc):
                 if not isinstance(play, dict):
                     continue
