@@ -35,6 +35,9 @@ addopts = "-ra -q --cov=src/infrakg --cov-report=term-missing"
 testpaths = [
     "tests",
 ]
+pythonpath = [
+    "src",
+]
 
 [tool.ruff]
 line-length = 88
