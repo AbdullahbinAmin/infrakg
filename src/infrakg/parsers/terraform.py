@@ -21,7 +21,7 @@ class TerraformParser(ParserPlugin):
         # Matches typical terraform references like: aws_vpc.main.id or aws_subnet.public
         # Also handles data sources: data.aws_vpc.selected.id
         ref_pattern = re.compile(
-            r"\b([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_-]+)(?:\.[a-zA-Z0-9_-]+)?\b"
+            r"\b([a-zA-Z_][a-zA-Z0-9_-]*)\.([a-zA-Z_][a-zA-Z0-9_-]*)(?:\.[a-zA-Z0-9_-]+)?\b"
         )
 
         for tf_file in directory.rglob("*.tf"):
@@ -37,11 +37,13 @@ class TerraformParser(ParserPlugin):
                 for res_dict in parsed["resource"]:
                     for res_type, res_blocks in res_dict.items():
                         for res_name, res_attrs in res_blocks.items():
-                            node_id = f"{res_type}.{res_name}"
+                            clean_type = res_type.strip("\"'")
+                            clean_name = res_name.strip("\"'")
+                            node_id = f"{clean_type}.{clean_name}"
                             node = Node(
                                 id=node_id,
-                                type=res_type,
-                                name=res_name,
+                                type=clean_type,
+                                name=clean_name,
                                 source=self.name,
                                 file_path=str(tf_file),
                                 attributes=res_attrs,
