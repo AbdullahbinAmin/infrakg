@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "infrakg"
+version = "0.1.0"
+description = "Infrastructure Knowledge Graph (InfraKG) - A unified dependency graph from DevOps infrastructure sources."
+authors = [{ name = "Author", email = "author@example.com" }]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.12.0",
+    "networkx>=3.2.1",
+    "python-hcl2>=4.3.0",
+    "pyyaml>=6.0.1",
+    "pydantic>=2.7.0"
+]
+keywords = ["infrastructure", "knowledge-graph", "terraform", "kubernetes", "devops"]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/infrakg"
+Repository = "https://github.com/yourusername/infrakg"
+
+[project.scripts]
+infrakg = "infrakg.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/infrakg"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov=src/infrakg --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+]
