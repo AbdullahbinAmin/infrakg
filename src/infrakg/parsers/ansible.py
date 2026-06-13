@@ -46,7 +46,6 @@ class AnsibleParser(ParserPlugin):
 
                 # Basic heuristic for a play
                 if "hosts" in play and ("tasks" in play or "roles" in play):
-                    is_playbook = True
                     play_name = play.get("name", f"play_{idx}")
                     play_node_id = f"ansible.playbook.{yaml_file.stem}.{play_name}"
 

@@ -51,4 +51,6 @@ select = [
 ]
 ignore = [
     "E501",  # line too long, handled by black
+    "B008",  # do not perform function call in argument defaults (needed for Typer)
+    "C901",  # function is too complex (McCabe)
 ]
