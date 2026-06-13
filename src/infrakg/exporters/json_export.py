@@ -1,8 +1,11 @@
 import json
+
 import networkx as nx
-from infrakg.graph import InfraGraph
-from infrakg.exporters.base import GraphExporter
+
 from infrakg.exporters import register_exporter
+from infrakg.exporters.base import GraphExporter
+from infrakg.graph import InfraGraph
+
 
 class JsonExporter(GraphExporter):
     @property
@@ -13,5 +16,6 @@ class JsonExporter(GraphExporter):
         data = nx.node_link_data(graph.graph)
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
+
 
 register_exporter(JsonExporter())

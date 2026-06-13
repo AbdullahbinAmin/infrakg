@@ -1,11 +1,15 @@
+from typing import Any, Dict, List, Optional, Set
+
 import networkx as nx
-from typing import List, Set, Dict, Any, Optional
-from infrakg.models import Node, Edge
+
+from infrakg.models import Edge, Node
+
 
 class InfraGraph:
     """
     Core graph engine managing the infrastructure dependency graph using NetworkX.
     """
+
     def __init__(self):
         self.graph = nx.DiGraph()
         self.nodes: Dict[str, Node] = {}
@@ -19,10 +23,24 @@ class InfraGraph:
         """Add a dependency edge to the graph. Source depends on Target."""
         # Ensure nodes exist
         if edge.source_id not in self.graph:
-            self.graph.add_node(edge.source_id, id=edge.source_id, name="Unknown", type="unknown", source="unknown", attributes={})
+            self.graph.add_node(
+                edge.source_id,
+                id=edge.source_id,
+                name="Unknown",
+                type="unknown",
+                source="unknown",
+                attributes={},
+            )
         if edge.target_id not in self.graph:
-            self.graph.add_node(edge.target_id, id=edge.target_id, name="Unknown", type="unknown", source="unknown", attributes={})
-            
+            self.graph.add_node(
+                edge.target_id,
+                id=edge.target_id,
+                name="Unknown",
+                type="unknown",
+                source="unknown",
+                attributes={},
+            )
+
         self.graph.add_edge(edge.source_id, edge.target_id, **edge.model_dump())
 
     def get_node(self, node_id: str) -> Optional[Node]:
@@ -60,7 +78,7 @@ class InfraGraph:
         """
         if node_id not in self.graph:
             return set()
-            
+
         # Ancestors are nodes that have a path to the given node
         impacted_nodes = nx.ancestors(self.graph, node_id)
         return impacted_nodes
@@ -73,5 +91,5 @@ class InfraGraph:
             "node_count": self.graph.number_of_nodes(),
             "edge_count": self.graph.number_of_edges(),
             "orphans_count": len(self.find_orphans()),
-            "cycles_count": len(self.find_circular_dependencies())
+            "cycles_count": len(self.find_circular_dependencies()),
         }

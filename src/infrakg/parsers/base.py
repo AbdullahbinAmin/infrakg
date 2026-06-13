@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 from pathlib import Path
+from typing import List, Tuple
 
-from infrakg.models import Node, Edge
+from infrakg.models import Edge, Node
+
 
 class ParserPlugin(ABC):
     """

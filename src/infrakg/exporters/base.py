@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 from infrakg.graph import InfraGraph
+
 
 class GraphExporter(ABC):
     """

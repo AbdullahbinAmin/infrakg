@@ -1,11 +1,13 @@
-import hcl2
 import re
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+from typing import Any, List, Tuple
 
-from infrakg.models import Node, Edge
-from infrakg.parsers.base import ParserPlugin
+import hcl2
+
+from infrakg.models import Edge, Node
 from infrakg.parsers import register_parser
+from infrakg.parsers.base import ParserPlugin
+
 
 class TerraformParser(ParserPlugin):
     @property
@@ -15,10 +17,12 @@ class TerraformParser(ParserPlugin):
     def parse(self, directory: Path) -> Tuple[List[Node], List[Edge]]:
         nodes = []
         edges = []
-        
+
         # Matches typical terraform references like: aws_vpc.main.id or aws_subnet.public
         # Also handles data sources: data.aws_vpc.selected.id
-        ref_pattern = re.compile(r'\b([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_-]+)(?:\.[a-zA-Z0-9_-]+)?\b')
+        ref_pattern = re.compile(
+            r"\b([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_-]+)(?:\.[a-zA-Z0-9_-]+)?\b"
+        )
 
         for tf_file in directory.rglob("*.tf"):
             try:
@@ -40,13 +44,13 @@ class TerraformParser(ParserPlugin):
                                 name=res_name,
                                 source=self.name,
                                 file_path=str(tf_file),
-                                attributes=res_attrs
+                                attributes=res_attrs,
                             )
                             nodes.append(node)
-                            
+
                             # Extract edges by looking for dependencies in attributes
                             self._extract_edges(node_id, res_attrs, ref_pattern, edges)
-                            
+
                             # Handle explicit depends_on
                             if "depends_on" in res_attrs:
                                 for dep in res_attrs["depends_on"]:
@@ -56,7 +60,9 @@ class TerraformParser(ParserPlugin):
                                     dep_str = str(dep)
                                     clean_dep = dep_str.strip("[]'\"")
                                     if clean_dep:
-                                        edges.append(Edge(source_id=node_id, target_id=clean_dep))
+                                        edges.append(
+                                            Edge(source_id=node_id, target_id=clean_dep)
+                                        )
 
             # Parse data sources similarly if needed
             if "data" in parsed:
@@ -70,19 +76,21 @@ class TerraformParser(ParserPlugin):
                                 name=data_name,
                                 source=self.name,
                                 file_path=str(tf_file),
-                                attributes=data_attrs
+                                attributes=data_attrs,
                             )
                             nodes.append(node)
                             self._extract_edges(node_id, data_attrs, ref_pattern, edges)
 
         return nodes, edges
 
-    def _extract_edges(self, node_id: str, attrs: Any, pattern: re.Pattern, edges: List[Edge]):
+    def _extract_edges(
+        self, node_id: str, attrs: Any, pattern: re.Pattern, edges: List[Edge]
+    ):
         """Recursively search for string references indicating dependencies."""
         if isinstance(attrs, dict):
             for k, v in attrs.items():
                 if k == "depends_on":
-                    continue # handled separately
+                    continue  # handled separately
                 self._extract_edges(node_id, v, pattern, edges)
         elif isinstance(attrs, list):
             for item in attrs:
@@ -96,10 +104,11 @@ class TerraformParser(ParserPlugin):
                     # for data sources, it should be data.type.name
                     # we can map it but let's keep it simple
                     continue
-                    
+
                 target_id = f"{match[0]}.{match[1]}"
                 # basic filtering for common false positives
                 if target_id != node_id and len(target_id) > 3:
                     edges.append(Edge(source_id=node_id, target_id=target_id))
+
 
 register_parser(TerraformParser())
